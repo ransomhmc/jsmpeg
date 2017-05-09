@@ -8,18 +8,15 @@
 			text-align: center;
 		}
 	</style>
-
+	
 </head>
 <body>
 	<canvas id="video-canvas"></canvas>
 	<script type="text/javascript" src="jsmpeg.min.js"></script>
 	<script type="text/javascript">
 		var canvas = document.getElementById('video-canvas');
-		var url_video = 'ws://'+document.location.hostname+':8082/';
-		var url_audio = 'ws://'+document.location.hostname+':8083/';
-		console.log(url_video);
-		console.log(url_audio);
-		var player = new JSMpeg.Player("", {canvas: canvas, maxAudioLag: 5,video_ws: url_video, audio_ws: url_audio});
+		var url = 'ws://'+document.location.hostname+':9999/';
+		var player = new JSMpeg.Player(url, {canvas: canvas});
 	</script>
 </body>
 </html>
