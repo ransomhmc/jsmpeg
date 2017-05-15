@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JSMpeg Stream Client</title>
+	<style type="text/css">
+		html, body {
+			background-color: #111;
+			text-align: center;
+		}
+	</style>
+	
+</head>
+<body>
+	<canvas id="video-canvas"></canvas>
+	<script type="text/javascript" src="src/jsmpeg.js"></script>
+	<script type="text/javascript" src="src/video-element.js"></script>
+	<script type="text/javascript" src="src/player.js"></script>
+	<script type="text/javascript" src="src/buffer.js"></script>
+	<script type="text/javascript" src="src/ajax.js"></script>
+	<script type="text/javascript" src="src/ajax-progressive.js"></script>
+	<script type="text/javascript" src="src/websocket.js"></script>
+	<script type="text/javascript" src="src/ts.js"></script>
+	<script type="text/javascript" src="src/decoder.js"></script>
+	<script type="text/javascript" src="src/mpeg1.js"></script>
+	<script type="text/javascript" src="src/mp2.js"></script>
+	<script type="text/javascript" src="src/buffered_renderer.js"></script>
+	<script type="text/javascript" src="src/webgl.js"></script>
+	<script type="text/javascript" src="src/canvas2d.js"></script>
+	<script type="text/javascript" src="src/webaudio.js"></script>
+	<script type="text/javascript">
+		var canvas = document.getElementById('video-canvas');
+		var url = 'ws://'+document.location.hostname+':9999/';
+		//var url = 'test.ts';
+		var player = new JSMpeg.Player(url, {canvas: canvas,loop: true, autoplay: true});
+	</script>
+</body>
+</html>

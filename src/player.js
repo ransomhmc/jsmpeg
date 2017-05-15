@@ -3,7 +3,6 @@ JSMpeg.Player = (function(){ "use strict";
 var Player = function(url, options) {
 	this.options = options || {};
 
-/*
 	if (options.source) {
 		this.source = new options.source(url, options);
 		options.streaming = !!this.source.streaming;
@@ -20,28 +19,24 @@ var Player = function(url, options) {
 		this.source = new JSMpeg.Source.Ajax(url, options);
 		options.streaming = false;
 	}
-*/
-
-	options.streaming = true;
-	console.log('aloha test2');
-	console.log('audio_ws:'+options.audio_ws);
-	console.log('video_ws:'+options.video_ws);
-	this.sourceA = new JSMpeg.Source.WebSocket(options.audio_ws,options);
-	this.sourceV = new JSMpeg.Source.WebSocket(options.video_ws,options);
 
 	this.maxAudioLag = options.maxAudioLag || 0.25;
 	this.loop = options.loop !== false;
 	this.autoplay = !!options.autoplay || options.streaming;
 
 	this.demuxer = new JSMpeg.Demuxer.TS(options);
-	this.sourceA.connect(this.demuxer);
-	this.sourceV.connect(this.demuxer);
+	this.source.connect(this.demuxer);
 
+	
 	if (options.video !== false) {
 		this.video = new JSMpeg.Decoder.MPEG1Video(options);
-		this.renderer = !options.disableGl && JSMpeg.Renderer.WebGL.IsSupported()
-			? new JSMpeg.Renderer.WebGL(options)
-			: new JSMpeg.Renderer.Canvas2D(options);
+		if (!options.disableGl && JSMpeg.Renderer.WebGL.IsSupported()) {
+			options.renderer = new JSMpeg.Renderer.WebGL(options);
+		}
+		else {
+			options.renderer = new JSMpeg.Renderer.Canvas2D(options);	
+		}
+		this.renderer = new JSMpeg.Renderer.BufferedRendererAdapter(options);
 		this.demuxer.connect(JSMpeg.Demuxer.TS.STREAM.VIDEO_1, this.video);
 		this.video.connect(this.renderer);
 	}
@@ -67,8 +62,7 @@ var Player = function(url, options) {
 		document.addEventListener('visibilitychange', this.showHide.bind(this));
 	}
 
-	this.sourceA.start();
-	this.sourceV.start();
+	this.source.start();
 
 	if (this.autoplay) {
 		this.play();
@@ -123,8 +117,7 @@ Player.prototype.stop = function(ev) {
 
 Player.prototype.destroy = function() {
 	this.pause();
-	this.sourceA.destroy();
-	this.sourceV.destroy();
+	this.source.destroy();
 	this.renderer.destroy();
 	this.audioOut.destroy();
 };
@@ -157,7 +150,7 @@ Player.prototype.setCurrentTime = function(time) {
 Player.prototype.update = function() {
 	this.animationId = requestAnimationFrame(this.update.bind(this));
 
-	if (!this.sourceV.established) {
+	if (!this.source.established) {
 		if (this.renderer) {
 			this.renderer.renderProgress(this.source.progress);
 		}
@@ -194,7 +187,7 @@ Player.prototype.updateForStreaming = function() {
 				this.audioOut.resetEnqueuedTime();
 				this.audioOut.enabled = false;
 			}
-			decoded = this.audio.decode();
+			decoded = this.audio.decode();		
 		} while (decoded);
 		this.audioOut.enabled = true;
 	}
@@ -210,7 +203,7 @@ Player.prototype.updateForStaticFile = function() {
 	if (this.audio && this.audio.canPlay) {
 		// Do we have to decode and enqueue some more audio data?
 		while (
-			!notEnoughData &&
+			!notEnoughData && 
 			this.audio.decodedTime - this.audio.currentTime < 0.25
 		) {
 			notEnoughData = !this.audio.decode();
@@ -246,12 +239,11 @@ Player.prototype.updateForStaticFile = function() {
 
 	// Notify the source of the playhead headroom, so it can decide whether to
 	// continue loading further data.
-	this.sourceA.resume(headroom);
-	this.sourceV.resume(headroom);
+	this.source.resume(headroom);
 
 	// If we failed to decode and the source is complete, it means we reached
 	// the end of our data. We may want to loop.
-	if (notEnoughData && this.sourceA.completed && this.sourceV.completed) {
+	if (notEnoughData && this.source.completed) {
 		if (this.loop) {
 			this.seek(0);
 		}
@@ -264,3 +256,4 @@ Player.prototype.updateForStaticFile = function() {
 return Player;
 
 })();
+
