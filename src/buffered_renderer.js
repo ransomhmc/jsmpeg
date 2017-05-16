@@ -58,17 +58,16 @@ var BufferedRenderer = function(options) {
 	this.busy = false;
 	this.previousPushtime = 0;
 	this.incomingDiffArray = [];
+	this.bufferParams = {};
 
-	this.bufferParams = {
-		'frameInterval' : 200,
-		'queueLowerBound' : 50,
-		'queueUpperBound' : 100
-	}
+	var fps = 10;
+	if (getQueryString('fps'))
+		fps = getQueryString('fps');
 
-	if (getQueryString('lowerBound')) this.bufferParams['queueLowerBound'] = getQueryString('lowerBound');
-	if (getQueryString('upperBound')) this.bufferParams['queueUpperBound'] = getQueryString('upperBound');
-	if (getQueryString('interval')) this.bufferParams['frameInterval'] = getQueryString('interval');
-//return;
+	this.bufferParams['frameInterval'] = 1000 / fps;
+	this.bufferParams['queueLowerBound'] = 5 * fps;
+	this.bufferParams['queueUpperBound'] = 10 * fps;
+ 
 	setInterval(BufferFunc,this.bufferParams['frameInterval'],this);
 };
 
@@ -84,20 +83,27 @@ BufferedRenderer.prototype.renderProgress = function(progress) {
 	this.renderer.renderProgress(progress);
 };
 
-BufferedRenderer.prototype.prebuf = function() {
+BufferedRenderer.prototype.calcBufState = function() {
+	if (this.previousPushtime == 0) {
+		this.previousPushtime = Date.now();
+		return;
+	}
+
 	var now = Date.now();
-	console.log('prebuf:array length='+this.incomingDiffArray.length);
-	if (this.previousPushtime > 0) {
-		this.incomingDiffArray.push(now - this.previousPushtime);
-		console.log('incomingDiff['+this.incomingDiffArray.length+']:'+this.incomingDiffArray[this.incomingDiffArray.length-1]);
-		var i;
+	//console.log('prebuf:array length='+this.incomingDiffArray.length);
+	
+	this.incomingDiffArray.push(now - this.previousPushtime);
+	//console.log('incomingDiff['+this.incomingDiffArray.length+']:'+this.incomingDiffArray[this.incomingDiffArray.length-1]);
+	
+	if (this.incomingDiffArray.length > 100) {
 		var diffTotal = 0;
-		
-		for (i=0;i<this.incomingDiffArray.length;i++) {
-			console.log('['+i+']='+this.incomingDiffArray[i]);
+		for (var i=0;i<this.incomingDiffArray.length;i++) {
 			diffTotal += this.incomingDiffArray[i];
 		}
-		console.log('average frame interval:'+diffTotal+'/'+this.incomingDiffArray.length+'='+diffTotal/this.incomingDiffArray.length);
+		var frameInterval = diffTotal/this.incomingDiffArray.length;
+		var fps = 1000 / frameInterval;
+		console.log('average fps:'+fps);
+		this.incomingDiffArray = [];
 	}
 };
 
@@ -106,13 +112,7 @@ BufferedRenderer.prototype.render = function(y, cb, cr) {
 	
 	var frame = new BufferedFrame(y,cb,cr,this.frameCountPushed++);
 	this.buffer.push(frame);
-	
-	if (this.buffer.length < this.bufferParams['queueLowerBound']) {
-		this.prebuf();
-	}
-	else {
-		this.incomingDiffArray = [];
-	}
+	this.calcBufState();
 	this.previousPushtime = Date.now();
 };
 
