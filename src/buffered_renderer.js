@@ -65,8 +65,14 @@ var BufferedRenderer = function(options) {
 		fps = getQueryString('fps');
 
 	this.bufferParams['frameInterval'] = 1000 / fps;
-	this.bufferParams['queueLowerBound'] = 5 * fps;
-	this.bufferParams['queueUpperBound'] = 10 * fps;
+	this.bufferParams['queueLowerBound'] = 0.5 * fps;
+	this.bufferParams['queueUpperBound'] = 1 * fps;
+
+	if (getQueryString('lower'))
+		this.bufferParams['queueLowerBound'] = parseInt(getQueryString('lower'));
+
+	if (getQueryString('upper'))
+		this.bufferParams['queueUpperBound'] = parseInt(getQueryString('upper'));
  
 	setInterval(BufferFunc,this.bufferParams['frameInterval'],this);
 };
