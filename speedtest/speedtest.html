@@ -8,15 +8,9 @@ Speed Test <hr>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <script type='text/javascript'>
-	var serverURLNode = 'http://'+window.location.host+'/speedtest/speedtestserver';
-	var settings = {
-		endpoint: serverURLNode,
-		delay: 5000,
-		data: {
-			size:50*1024*1024
-		}
-	};
 	var clientLocation;
+	var serverLocation;
+	var serverURLNode = 'http://'+window.location.host+'/speedtest/speedtestserver';
 
 	function getHostName(url) {
 		var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
@@ -28,45 +22,62 @@ Speed Test <hr>
 		}
 	}
 
-	function start(size) {
-		//console.log('start:'+size);
-		document.getElementById('result').innerHTML += 'testing download speed: duration='+settings.delay/1000+' seconds <br>';
+	function start(size, server) {
+		//document.getElementById('result').innerHTML += 'download speed test with '+server+' : duration='+settings.delay/1000+' seconds <br>';
     }
 
-    function progress(avg, instant) {
-		//console.log('progress:'+avg/1024/1024);
+    function progress(avg, instant, location) {
+		console.log('progress '+location+' :'+instant/1024/1024);
     }
 
-    function end(avg) {
+    function end(avg, server) {
     	avg = avg * 8 / 1024 / 1024;
-		document.getElementById('result').innerHTML += 'result: '+avg.toFixed(2)+' Mbits/sec, or '+(avg/8).toFixed(2)+'MBytes/sec <hr>';
+		document.getElementById('result').innerHTML += server+' result: '+avg.toFixed(2)+' Mbits/sec, or '+(avg/8).toFixed(2)+'MBytes/sec <br>';
     }
-	function restart(size) {
+	function restart(size,net) {
 		console.log('restart:'+size);
-		console.log('will abort!');
-		net.download.abort();
 	}
-	function test(serverURL) {
-		settings.endpoint = serverURL;
+	function test(serverURL,location) {
+		var settings = {endpoint:serverURL,delay:5000,data:{size:50*1024*1024}};
 		var net = new Network(settings);
-		net.download.on('start', start).on('progress', progress).on('restart', restart).on('end', end);
+		net.download.on('start', function(size) {return start(size,location);});
+		net.download.on('progress', function(avg, instant) {return progress(avg,instant,location);});
+		net.download.on('restart', function(size) {return restart(size,net)});
+		net.download.on('end', function(avg) {return end(avg,location);});
 		net.download.start();
-		console.log('started! serverURL='+serverURL);
+	}
+
+	function testAll() {
+		var serverList = 
+		[
+			{url:'http://172.104.83.248/speedtest/speedtestserver', location:'Japan'},
+			{url:'http://52.78.137.116/speedtest/speedtestserver', location:'Korea'},
+			{url:'http://139.162.37.171:8080/speedtest/speedtestserver', location:'Singapore'},
+			{url:'http://137.116.169.130/speedtest/speedtestserver', location:'Hong Kong'}
+		];
+
+		serverList.forEach(function(server) {
+			test(server.url, server.location);
+		});
+		
 	}
 
 	$.getJSON("http://freegeoip.net/json/", function (data) {
 			var country = data.country_name;
 			var ip = data.ip;
-			document.getElementById('result').innerHTML += 'your ip: '+ip+', location:'+country+'<br>';
+			document.getElementById('result').innerHTML += 'your ip: '+ip+', location:'+country+'<hrr>';
+			clientLocation = country;
 	});
-	$.getJSON("http://freegeoip.net/json/"+getHostName(serverURLNode), function (data) {
+	$.getJSON("http://freegeoip.net/json/"+window.location.hostname, function (data) {
 			var country = data.country_name;
 			var ip = data.ip;
 			document.getElementById('result').innerHTML += 'server ip: '+ip+', location:'+country+'<hr>';
+			serverLocation = country;
 	});
 </script>
 
-<input type="button" onclick="test(serverURLNode);" name="ok" value="download speed test"  /> <br>
+<input type="button" onclick="test(serverURLNode,serverLocation);" name="ok" value="speed test (this server)"  /> <br>
+<input type="button" onclick="testAll();" name="ok" value="speed test (all)"  /> <br>
 
 <hr>
 
