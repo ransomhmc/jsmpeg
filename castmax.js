@@ -1,10 +1,11 @@
 
 var http = require('http');
-
 var express = require('express');
-
 var router = express();
 var server = http.createServer(router);
+var fs = require('fs');
+var WebSocket = require('ws');
+var ip = require('ip');
 
 router.use(express.static('.'));
 router.use(express.static('speedtest'));
@@ -63,9 +64,11 @@ router.get('/speedtest/speedtestserver', function(req, res){
   res.end();
 });
 
-server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
+var relay = require('./relay');
+relay.start();
+
+server.listen(process.env.PORT || 80, process.env.IP || "0.0.0.0", function(){
   var addr = server.address();
-  
-  console.log(" server listening at", addr.address + ":" + addr.port);
+  console.log("Web Server: viewer html and speedtest listening at", ip.address() + ":" + server.address().port);
 
   });
