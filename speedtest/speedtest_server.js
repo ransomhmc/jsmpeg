@@ -35,6 +35,10 @@ router.get('/speedtest/speedtestserver', function(req, res){
     
     // Provide a base string which will be provided as a response to the client
     var baseString='This text is so uncool, deal with it. ';
+
+    // Make it 2^10 times longer...otherwise res.write() behaves in a weird way
+    for (var i=0;i<10;i++)
+      baseString += baseString;
     var baseLength=baseString.length;
     // Output the string as much as necessary to reach the required size
    
