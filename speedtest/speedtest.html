@@ -65,7 +65,7 @@ Speed Test <hr>
 	$.getJSON("http://freegeoip.net/json/", function (data) {
 			var country = data.country_name;
 			var ip = data.ip;
-			document.getElementById('result').innerHTML += 'your ip: '+ip+', location:'+country+'<hrr>';
+			document.getElementById('result').innerHTML += 'your ip: '+ip+', location:'+country+'<hr>';
 			clientLocation = country;
 	});
 	$.getJSON("http://freegeoip.net/json/"+window.location.hostname, function (data) {
