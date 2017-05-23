@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ransomhmc/jsmpeg#readme",
   "dependencies": {
+    "express": "^4.15.3",
     "http-server": "^0.10.0",
     "ws": "^2.2.3"
   }

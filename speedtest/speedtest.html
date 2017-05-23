@@ -1,0 +1,46 @@
+<html>
+<body>
+aloha
+<script src="network.min.js"></script>
+<script type='text/javascript'>
+	var serverURLNode = 'http://'+window.location.host+'/speedtest/speedtestserver';
+	var serverURLPHP = 'http://'+window.location.host+'/speedtest/speedtest_server.php';
+	var settings = {
+	//endpoint: 'speedtest/server.php',
+	endpoint: serverURLPHP,
+	delay: 5000,
+	data: {
+		size:50*1024*1024
+	}
+};
+	
+	function start(size) {
+		console.log('start:'+size);
+    }
+
+    function progress(avg, instant) {
+	console.log('progress:'+avg/1024/1024);
+    }
+
+    function end(avg) {
+	console.log('end:'+avg/1024/1024);
+    }
+	function restart(size) {
+		console.log('restart:'+size);
+		console.log('will abort!');
+		net.download.abort();
+	}
+	function test(serverURL) {
+		settings.endpoint = serverURL;
+
+		var net = new Network(settings);
+		net.download.on('start', start).on('progress', progress).on('restart', restart).on('end', end);
+		net.download.start();
+		console.log('started! serverURL='+serverURL);
+	}
+</script>
+
+<input type="button" onclick="test(serverURLNode);" name="ok" value="nodejs test"  /> <br>
+<input type="button" onclick="test(serverURLPHP);" name="ok" value="php test"  />
+</body>
+</html>
