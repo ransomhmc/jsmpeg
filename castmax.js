@@ -7,6 +7,15 @@ var router = express();
 var server = http.createServer(router);
 
 router.use(express.static('.'));
+router.use(express.static('speedtest'));
+
+router.get('/', function (req,res) {
+  res.sendFile('view-stream-buffer.html',{root: '.'});
+});
+
+router.get('/speedtest', function (req,res) {
+  res.sendFile('speedtest/speedtest.html',{root: '.'});
+});
 
 router.get('/speedtest/speedtestserver', function(req, res){
 
@@ -30,7 +39,6 @@ router.get('/speedtest/speedtestserver', function(req, res){
     {
       contentSize=parseInt(params['size']);
       contentSize=Math.min(contentSize,200*1024*1024);
-      
     }
     
     // Provide a base string which will be provided as a response to the client
