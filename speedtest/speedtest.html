@@ -52,8 +52,8 @@ Speed Test <hr>
 				selectedServer = server;
 			}			
 		});
-		document.getElementById('result').innerHTML += 'selected server:'+selectedServer.location+","+selectedServer.url+',redirect after 3 sec...<br>';
-		setTimeout(function() {
+		document.getElementById('result').innerHTML += 'selected server:'+selectedServer.location+","+selectedServer.url;
+		//setTimeout(function() {
 			var regex = /^(?:([A-Za-z]+):)?\/{0,3}([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
 			var match = selectedServer.url.match(regex);
 			var redirect_url = match[1]+"://"+match[2]; 
@@ -61,7 +61,7 @@ Speed Test <hr>
 				redirect_url +=':'+match[3]
 			redirect_url += '/'
 			window.location.href=redirect_url;
-		},3000);
+		//},3000);
 	}
 
 	function restart(size,net)
