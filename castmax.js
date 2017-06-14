@@ -72,3 +72,30 @@ server.listen(process.env.PORT || 80, process.env.IP || "0.0.0.0", function(){
   console.log("Web Server: viewer html and speedtest listening at", ip.address() + ":" + server.address().port);
 
   });
+
+//h264 websocket server
+const app = express();
+const server264  = http.createServer(app);
+const source264_ws = require('./h264/wsfeed');
+const source264_static = require('./h264/static');
+const feed    = new source264_ws(server264, {
+  feed_ip   : "127.0.0.1",
+  feed_port : 10001,
+  width: 1280,
+  height: 720
+});
+
+//h264 from static file
+const server264_static = http.createServer(app);
+const feed2 = new source264_static(server264_static, {
+  width     : 1280,
+  height    : 720,
+  video_path     : "copy.264",
+  //video_duration : 58,
+});
+server264_static.listen(10003);
+//
+
+server264.listen(10002);
+console.log('server264: listen at port 10002')
+//

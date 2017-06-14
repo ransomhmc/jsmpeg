@@ -7,6 +7,8 @@ var fs = require('fs'),
 var STREAM_SECRET = 'aloha',
 	STREAM_PORT = 8888,
 	WEBSOCKET_PORT = 9999,
+	STREAM_PORT_264 = 10000,
+	WEBSOCKET_PORT_264 = 10001,
 	RECORD_STREAM = false;
 
 // Websocket Server
@@ -42,6 +44,25 @@ socketServer.broadcast = function(data) {
 		}
 	});
 };
+
+//web socket server for h264 streams
+var socketServer264 = new WebSocket.Server({port:WEBSOCKET_PORT_264,perMessageDeflate: false});
+socketServer264.broadcast = function(data) {
+	socketServer264.clients.forEach(function each(client) {
+		if (client.readyState === WebSocket.OPEN) {
+			client.send(data);
+		}
+	});
+};
+
+var streamServer264 = http.createServer( function(request,response) {
+	response.connection.setTimeout(0);
+	request.on('data', function(data) {
+		socketServer264.broadcast(data);
+	});
+});
+streamServer264.listen(STREAM_PORT_264);
+//
 
 // HTTP Server to accept incomming MPEG-TS Stream from ffmpeg
 var streamServer = http.createServer( function(request, response) {
@@ -87,6 +108,9 @@ module.exports = {
 		console.log('Relay: Listening WebSocket on port '+ip.address() + ":" + httpServerForWS.address().port);
 		streamServer.listen(STREAM_PORT);
 		console.log('Relay: Listening MPEG-TS Stream on port '+ip.address()+ ":" + streamServer.address().port+'/'+STREAM_SECRET);
+
+		console.log('Relay: Listening client h.264 WebSocket on port '+ip.address() + ":" + WEBSOCKET_PORT_264);
+		console.log('Relay: Listening h.264 Stream on port '+ip.address()+":"+STREAM_PORT_264);
 	},
 	stop : function() {
 		console.log('TODO!! stop relay');

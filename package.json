@@ -20,6 +20,10 @@
     "express": "^4.15.3",
     "http-server": "^0.10.0",
     "ip": "^1.1.5",
+    "mout": "^1.0.0",
+    "stream-split": "^1.1.0",
+    "stream-throttle": "^0.1.3",
+    "websocket-stream": "^5.0.0",
     "ws": "^2.2.3"
   }
 }

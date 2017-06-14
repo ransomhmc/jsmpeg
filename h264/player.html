@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>castmax h264 demo</title>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="h264player.js">;</script>
+    <script type="text/javascript">
+
+var canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
+
+
+var uri = "ws://" + document.location.hostname+':10002'
+var player = new WSAvcPlayer(canvas, "webgl", 1, 35);
+player.connect(uri);
+player.on('wsConnected', function () {
+  console.log('player got wsConnected');
+  player.playStream();
+});
+
+
+    </script>
+  </body>
+</html>
